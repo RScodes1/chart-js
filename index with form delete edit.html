@@ -19,6 +19,9 @@
         
         <button type="submit">Add Data</button>
     </form>
+
+    <button id="removeEntry">Remove Last Entry</button>
+
     <script>
          var ctx = document.getElementById('myChart').getContext('2d');
 
@@ -67,6 +70,14 @@
             document.getElementById('month').value = '';
             document.getElementById('attendance').value = '';
             document.getElementById('performance').value = '';
+        });
+
+        document.getElementById('removeEntry').addEventListener('click', function() {
+            myChart.data.labels.pop();
+            myChart.data.datasets.forEach(function(dataset) {
+                dataset.data.pop();
+            });
+            myChart.update();
         });
 
        
