@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hardcoded Bar Graph with Chart.js</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <canvas id="myChart" width="400" height="200"></canvas>
+
+    <form id="dataForm">
+        <label for="month">Month:</label>
+        <input type="text" id="month" name="month" required><br><br>
+        
+        <label for="attendance">Attendance:</label>
+        <input type="number" id="attendance" name="attendance" required><br><br>
+        
+        <label for="performance">Performance:</label>
+        <input type="number" id="performance" name="performance" required><br><br>
+        
+        <button type="submit">Add Data</button>
+    </form>
+    <script>
+         var ctx = document.getElementById('myChart').getContext('2d');
+
+            // Create the chart
+            var myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels : [],
+                    datasets : []
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+        // Hardcoded data
+        document.getElementById('dataForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            var month = document.getElementById('month').value;
+            var attendance = parseInt(document.getElementById('attendance').value);
+            var performance = parseInt(document.getElementById('performance').value);
+
+            myChart.data.labels.push(month);
+            myChart.data.datasets.push({
+                label: 'Attendance',
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 1,
+                data: [attendance]
+            },
+            {
+                label: 'Performance',
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1,
+                data: [performance]
+            });
+
+            myChart.update();
+
+            // Reset form fields
+            document.getElementById('month').value = '';
+            document.getElementById('attendance').value = '';
+            document.getElementById('performance').value = '';
+        });
+
+       
+    </script>
+</body>
+</html>
