@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Hardcoded Bar Graph with Chart.js</title>
+    <title>Dynamic Bar Graph with Chart.js</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <canvas id="myChart" width="400" height="200"></canvas>
-
+    
     <form id="dataForm">
         <label for="month">Month:</label>
-        <input type="text" id="month" name="month" required><br><br>
+        <select id="monthSelect" name="monthSelect" onchange="updateFormFields()">
+            <option value="">Select Month</option>
+        </select><br><br>
         
         <label for="attendance">Attendance:</label>
         <input type="number" id="attendance" name="attendance" required><br><br>
@@ -17,70 +19,96 @@
         <label for="performance">Performance:</label>
         <input type="number" id="performance" name="performance" required><br><br>
         
-        <button type="submit">Add Data</button>
+        <button type="submit">Add/Update Data</button>
     </form>
 
-    <button id="removeEntry">Remove Last Entry</button>
+    <button id="removeEntry">Remove Selected Month</button>
 
     <script>
-         var ctx = document.getElementById('myChart').getContext('2d');
+        var ctx = document.getElementById('myChart').getContext('2d');
 
-            // Create the chart
-            var myChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels : [],
-                    datasets : []
-                },
-                options: {
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
+        var chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: [],
+                datasets: []
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
                     }
                 }
-            });
+            }
+        });
 
-        // Hardcoded data
+        var dataValues = {};
+
+        function updateFormFields() {
+            var selectedMonth = document.getElementById('monthSelect').value;
+            if (selectedMonth) {
+                document.getElementById('attendance').value = dataValues[selectedMonth].attendance;
+                document.getElementById('performance').value = dataValues[selectedMonth].performance;
+            } else {
+                document.getElementById('attendance').value = '';
+                document.getElementById('performance').value = '';
+            }
+        }
+
         document.getElementById('dataForm').addEventListener('submit', function(event) {
             event.preventDefault();
 
-            var month = document.getElementById('month').value;
+            var month = document.getElementById('monthSelect').value;
             var attendance = parseInt(document.getElementById('attendance').value);
             var performance = parseInt(document.getElementById('performance').value);
 
-            myChart.data.labels.push(month);
-            myChart.data.datasets.push({
+            if (month && attendance && performance) {
+                if (dataValues.hasOwnProperty(month)) {
+                    // Update existing data
+                    dataValues[month].attendance = attendance;
+                    dataValues[month].performance = performance;
+                } else {
+                    // Add new data
+                    dataValues[month] = { attendance: attendance, performance: performance };
+                    document.getElementById('monthSelect').innerHTML += '<option value="' + month + '">' + month + '</option>';
+                }
+
+                updateChart();
+            }
+
+            // Reset form fields
+            document.getElementById('attendance').value = '';
+            document.getElementById('performance').value = '';
+        });
+
+        function updateChart() {
+            chart.data.labels = Object.keys(dataValues);
+            chart.data.datasets = [{
                 label: 'Attendance',
                 backgroundColor: 'rgba(255, 99, 132, 0.2)',
                 borderColor: 'rgba(255, 99, 132, 1)',
                 borderWidth: 1,
-                data: [attendance]
+                data: Object.values(dataValues).map(obj => obj.attendance)
             },
             {
                 label: 'Performance',
                 backgroundColor: 'rgba(54, 162, 235, 0.2)',
                 borderColor: 'rgba(54, 162, 235, 1)',
                 borderWidth: 1,
-                data: [performance]
-            });
+                data: Object.values(dataValues).map(obj => obj.performance)
+            }];
 
-            myChart.update();
-
-            document.getElementById('month').value = '';
-            document.getElementById('attendance').value = '';
-            document.getElementById('performance').value = '';
-        });
+            chart.update();
+        }
 
         document.getElementById('removeEntry').addEventListener('click', function() {
-            myChart.data.labels.pop();
-            myChart.data.datasets.forEach(function(dataset) {
-                dataset.data.pop();
-            });
-            myChart.update();
+            var selectedMonth = document.getElementById('monthSelect').value;
+            if (selectedMonth && dataValues.hasOwnProperty(selectedMonth)) {
+                delete dataValues[selectedMonth];
+                document.getElementById('monthSelect').remove(document.getElementById('monthSelect').selectedIndex);
+                updateChart();
+            }
         });
-
-       
     </script>
 </body>
 </html>
